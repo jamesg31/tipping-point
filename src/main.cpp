@@ -9,13 +9,14 @@ pros::Motor right_claw(5);
 
 int speed = 2;
 bool locked = true;
+bool combined = true;
 
 void display_fn()
 {
 	master.clear();
 	while (true)
 	{
-		double battery = master.get_battery_capacity();
+		double battery = pros::battery::get_capacity();
 		master.set_text(0, 0, std::to_string(battery).substr(0, 2) + "% " + std::to_string(pros::competition::get_status()));
 		pros::delay(50);
 		if (speed == 1)
@@ -34,6 +35,15 @@ void display_fn()
 		else
 		{
 			master.set_text(1, 9, "Br(A): Off");
+		}
+		pros::delay(50);
+		if (combined)
+		{
+			master.set_text(2, 0, "Com(Y): On ");
+		}
+		else
+		{
+			master.set_text(2, 0, "Com(Y): Off");
 		}
 		pros::delay(50);
 	}
@@ -110,30 +120,52 @@ void opcontrol()
 		left_mtr = left / speed;
 		right_mtr = right / speed;
 
-		if (master.get_digital(DIGITAL_L1))
+		if (combined)
 		{
-			left_claw.move_velocity(35);
-		}
-		else if (master.get_digital(DIGITAL_L2))
-		{
-			left_claw.move_velocity(-35);
+			if (master.get_digital(DIGITAL_R1))
+			{
+				right_claw.move_velocity(-35);
+				left_claw.move_velocity(35);
+			}
+			else if (master.get_digital(DIGITAL_R2))
+			{
+				right_claw.move_velocity(35);
+				left_claw.move_velocity(-35);
+			}
+			else
+			{
+				right_claw.move_velocity(0);
+				left_claw.move_velocity(0);
+			}
 		}
 		else
 		{
-			left_claw.move_velocity(0);
-		}
 
-		if (master.get_digital(DIGITAL_R1))
-		{
-			right_claw.move_velocity(-35);
-		}
-		else if (master.get_digital(DIGITAL_R2))
-		{
-			right_claw.move_velocity(35);
-		}
-		else
-		{
-			right_claw.move_velocity(0);
+			if (master.get_digital(DIGITAL_L1))
+			{
+				left_claw.move_velocity(35);
+			}
+			else if (master.get_digital(DIGITAL_L2))
+			{
+				left_claw.move_velocity(-35);
+			}
+			else
+			{
+				left_claw.move_velocity(0);
+			}
+
+			if (master.get_digital(DIGITAL_R1))
+			{
+				right_claw.move_velocity(-35);
+			}
+			else if (master.get_digital(DIGITAL_R2))
+			{
+				right_claw.move_velocity(35);
+			}
+			else
+			{
+				right_claw.move_velocity(0);
+			}
 		}
 
 		if (master.get_digital_new_press(DIGITAL_X))
@@ -161,6 +193,18 @@ void opcontrol()
 				locked = true;
 				left_claw.set_brake_mode(pros::motor_brake_mode_e_t::E_MOTOR_BRAKE_HOLD);
 				right_claw.set_brake_mode(pros::motor_brake_mode_e_t::E_MOTOR_BRAKE_HOLD);
+			}
+		}
+
+		if (master.get_digital_new_press(DIGITAL_Y))
+		{
+			if (combined)
+			{
+				combined = false;
+			}
+			else
+			{
+				combined = true;
 			}
 		}
 
