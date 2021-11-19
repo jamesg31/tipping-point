@@ -58,19 +58,47 @@ void autonomous() {}
 void opcontrol()
 {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::Motor left_mtr(1);
-	pros::Motor right_mtr(2);
+	pros::Motor left_mtr(2);
+	pros::Motor right_mtr(3);
+	pros::Motor left_claw(4);
+	pros::Motor right_claw(5);
+
+	left_claw.set_brake_mode(pros::motor_brake_mode_e_t::E_MOTOR_BRAKE_HOLD);
+	right_claw.set_brake_mode(pros::motor_brake_mode_e_t::E_MOTOR_BRAKE_HOLD);
 
 	while (true)
 	{
-		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-						 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-						 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
 		int left = master.get_analog(ANALOG_LEFT_Y);
 		int right = master.get_analog(ANALOG_RIGHT_Y);
 
 		left_mtr = left;
 		right_mtr = right;
+
+		if (master.get_digital(DIGITAL_L1))
+		{
+			left_claw.move_velocity(35);
+		}
+		else if (master.get_digital(DIGITAL_L2))
+		{
+			left_claw.move_velocity(-35);
+		}
+		else
+		{
+			left_claw.move_velocity(0);
+		}
+
+		if (master.get_digital(DIGITAL_R1))
+		{
+			right_claw.move_velocity(-35);
+		}
+		else if (master.get_digital(DIGITAL_R2))
+		{
+			right_claw.move_velocity(35);
+		}
+		else
+		{
+			right_claw.move_velocity(0);
+		}
 		pros::delay(20);
 	}
 }
