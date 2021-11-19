@@ -2,6 +2,7 @@
 #include <string>
 
 pros::Controller master(pros::E_CONTROLLER_MASTER);
+pros::Controller partner(pros::E_CONTROLLER_PARTNER);
 pros::Motor left_mtr(2);
 pros::Motor right_mtr(3);
 pros::Motor left_claw(4);
@@ -9,7 +10,8 @@ pros::Motor right_claw(5);
 
 int speed = 2;
 bool locked = true;
-bool combined = true;
+bool combined_master = true;
+bool combined_partner = true;
 
 void display_fn()
 {
@@ -18,32 +20,48 @@ void display_fn()
 	{
 		double battery = pros::battery::get_capacity();
 		master.set_text(0, 0, std::to_string(battery).substr(0, 2) + "% " + std::to_string(pros::competition::get_status()));
+		partner.set_text(0, 0, std::to_string(battery).substr(0, 2) + "% " + std::to_string(pros::competition::get_status()));
 		pros::delay(50);
 		if (speed == 1)
 		{
 			master.set_text(1, 0, "Sp(X): F");
+			partner.set_text(1, 0, "Sp(X): F");
 		}
 		else
 		{
 			master.set_text(1, 0, "Sp(X): S");
+			partner.set_text(1, 0, "Sp(X): S");
 		}
 		pros::delay(50);
 		if (locked)
 		{
 			master.set_text(1, 9, "Br(A): On ");
+			partner.set_text(1, 9, "Br(A): On ");
 		}
 		else
 		{
 			master.set_text(1, 9, "Br(A): Off");
+			partner.set_text(1, 9, "Br(A): Off");
 		}
 		pros::delay(50);
-		if (combined)
+		if (combined_master)
 		{
 			master.set_text(2, 0, "Com(Y): On ");
+			partner.set_text(2, 13, "ComM(Y): On");
 		}
 		else
 		{
 			master.set_text(2, 0, "Com(Y): Off");
+			partner.set_text(2, 13, "ComM(Y): Off");
+		}
+		pros::delay(50);
+		if (combined_partner)
+		{
+			partner.set_text(2, 0, "ComP(Y): On ");
+		}
+		else
+		{
+			partner.set_text(2, 0, "ComP(Y): Off");
 		}
 		pros::delay(50);
 	}
@@ -120,7 +138,8 @@ void opcontrol()
 		left_mtr = left / speed;
 		right_mtr = right / speed;
 
-		if (combined)
+		// master claw
+		if (combined_master)
 		{
 			if (master.get_digital(DIGITAL_R1))
 			{
@@ -168,7 +187,56 @@ void opcontrol()
 			}
 		}
 
-		if (master.get_digital_new_press(DIGITAL_X))
+		// partner claw
+		if (combined_partner)
+		{
+			if (partner.get_digital(DIGITAL_R1))
+			{
+				right_claw.move_velocity(-35);
+				left_claw.move_velocity(35);
+			}
+			else if (partner.get_digital(DIGITAL_R2))
+			{
+				right_claw.move_velocity(35);
+				left_claw.move_velocity(-35);
+			}
+			else
+			{
+				right_claw.move_velocity(0);
+				left_claw.move_velocity(0);
+			}
+		}
+		else
+		{
+
+			if (partner.get_digital(DIGITAL_L1))
+			{
+				left_claw.move_velocity(35);
+			}
+			else if (partner.get_digital(DIGITAL_L2))
+			{
+				left_claw.move_velocity(-35);
+			}
+			else
+			{
+				left_claw.move_velocity(0);
+			}
+
+			if (partner.get_digital(DIGITAL_R1))
+			{
+				right_claw.move_velocity(-35);
+			}
+			else if (partner.get_digital(DIGITAL_R2))
+			{
+				right_claw.move_velocity(35);
+			}
+			else
+			{
+				right_claw.move_velocity(0);
+			}
+		}
+
+		if (master.get_digital_new_press(DIGITAL_X) || partner.get_digital_new_press(DIGITAL_X))
 		{
 			if (speed == 1)
 			{
@@ -180,7 +248,7 @@ void opcontrol()
 			}
 		}
 
-		if (master.get_digital_new_press(DIGITAL_A))
+		if (master.get_digital_new_press(DIGITAL_A) || partner.get_digital_new_press(DIGITAL_A))
 		{
 			if (locked)
 			{
@@ -196,15 +264,27 @@ void opcontrol()
 			}
 		}
 
-		if (master.get_digital_new_press(DIGITAL_Y))
+		if (master.get_digital_new_press(DIGITAL_Y) || partner.get_digital_new_press(DIGITAL_Y))
 		{
-			if (combined)
+			if (combined_master)
 			{
-				combined = false;
+				combined_master = false;
 			}
 			else
 			{
-				combined = true;
+				combined_master = true;
+			}
+		}
+
+		if (partner.get_digital_new_press(DIGITAL_B))
+		{
+			if (combined_partner)
+			{
+				combined_partner = false;
+			}
+			else
+			{
+				combined_partner = true;
 			}
 		}
 
