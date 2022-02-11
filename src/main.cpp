@@ -1,17 +1,22 @@
 #include "main.h"
 #include <string>
+#define DIGITAL_SENSOR_PORT 'H'
 
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 pros::Controller partner(pros::E_CONTROLLER_PARTNER);
-pros::Motor left_mtr(2);
-pros::Motor right_mtr(3);
-pros::Motor left_claw(4);
-pros::Motor right_claw(5);
+pros::Motor left_mtr_front(4);
+pros::Motor left_mtr_back(19);
+pros::Motor right_mtr_front(14);
+pros::Motor right_mtr_back(16);
+pros::Motor left_claw(1);
+pros::Motor right_claw(2);
+pros::Motor left_lift(17);
+pros::Motor right_lift(20);
 
 int speed = 2;
 bool locked = true;
-bool combined_master = true;
-bool combined_partner = true;
+bool combined = true;
+bool piston_state = false;
 
 void display_fn()
 {
@@ -19,49 +24,47 @@ void display_fn()
 	while (true)
 	{
 		double battery = pros::battery::get_capacity();
-		master.set_text(0, 0, std::to_string(battery).substr(0, 2) + "% " + std::to_string(pros::competition::get_status()));
-		partner.set_text(0, 0, std::to_string(battery).substr(0, 2) + "% " + std::to_string(pros::competition::get_status()));
+		master.set_text(0, 0, std::to_string(battery).substr(0, 2) + "% " + std::to_string(pros::competition::get_status()) + " " + std::to_string(left_claw.get_position()).substr(0, 2));
+		pros::delay(50);
+		partner.set_text(0, 0, std::to_string(battery).substr(0, 2) + "% " + std::to_string(pros::competition::get_status()) + " " + std::to_string(right_claw.get_position()).substr(0, 2));
 		pros::delay(50);
 		if (speed == 1)
 		{
 			master.set_text(1, 0, "Sp(X): F");
+			pros::delay(50);
 			partner.set_text(1, 0, "Sp(X): F");
 		}
 		else
 		{
 			master.set_text(1, 0, "Sp(X): S");
+			pros::delay(50);
 			partner.set_text(1, 0, "Sp(X): S");
 		}
 		pros::delay(50);
 		if (locked)
 		{
 			master.set_text(1, 9, "Br(A): On ");
+			pros::delay(50);
 			partner.set_text(1, 9, "Br(A): On ");
 		}
 		else
 		{
 			master.set_text(1, 9, "Br(A): Off");
+			pros::delay(50);
 			partner.set_text(1, 9, "Br(A): Off");
 		}
 		pros::delay(50);
-		if (combined_master)
+		if (combined)
 		{
 			master.set_text(2, 0, "Com(Y): On ");
-			partner.set_text(2, 13, "ComM(Y): On");
+			pros::delay(50);
+			partner.set_text(2, 0, "Com(Y): On ");
 		}
 		else
 		{
 			master.set_text(2, 0, "Com(Y): Off");
-			partner.set_text(2, 13, "ComM(Y): Off");
-		}
-		pros::delay(50);
-		if (combined_partner)
-		{
-			partner.set_text(2, 0, "ComP(Y): On ");
-		}
-		else
-		{
-			partner.set_text(2, 0, "ComP(Y): Off");
+			pros::delay(50);
+			partner.set_text(2, 0, "Com(Y): Off");
 		}
 		pros::delay(50);
 	}
@@ -124,32 +127,39 @@ void autonomous() {}
  */
 void opcontrol()
 {
+	pros::ADIDigitalOut piston(DIGITAL_SENSOR_PORT);
+
 	if (locked)
 	{
 		left_claw.set_brake_mode(pros::motor_brake_mode_e_t::E_MOTOR_BRAKE_HOLD);
 		right_claw.set_brake_mode(pros::motor_brake_mode_e_t::E_MOTOR_BRAKE_HOLD);
 	}
 
+	left_lift.set_brake_mode(pros::motor_brake_mode_e_t::E_MOTOR_BRAKE_HOLD);
+	right_lift.set_brake_mode(pros::motor_brake_mode_e_t::E_MOTOR_BRAKE_HOLD);
+
 	while (true)
 	{
 		int left = master.get_analog(ANALOG_LEFT_Y);
 		int right = master.get_analog(ANALOG_RIGHT_Y);
 
-		left_mtr = left / speed;
-		right_mtr = right / speed;
+		left_mtr_back = left / speed;
+		left_mtr_front = left / speed;
+		right_mtr_back = right / speed * -1;
+		right_mtr_front = right / speed * -1;
 
 		// master claw
-		if (combined_master)
+		if (combined)
 		{
 			if (master.get_digital(DIGITAL_R1))
 			{
-				right_claw.move_velocity(-35);
-				left_claw.move_velocity(35);
+				right_claw.move_velocity(-50);
+				left_claw.move_velocity(50);
 			}
 			else if (master.get_digital(DIGITAL_R2))
 			{
-				right_claw.move_velocity(35);
-				left_claw.move_velocity(-35);
+				right_claw.move_velocity(50);
+				left_claw.move_velocity(-50);
 			}
 			else
 			{
@@ -162,11 +172,11 @@ void opcontrol()
 
 			if (master.get_digital(DIGITAL_L1))
 			{
-				left_claw.move_velocity(35);
+				left_claw.move_velocity(50);
 			}
 			else if (master.get_digital(DIGITAL_L2))
 			{
-				left_claw.move_velocity(-35);
+				left_claw.move_velocity(-50);
 			}
 			else
 			{
@@ -175,11 +185,11 @@ void opcontrol()
 
 			if (master.get_digital(DIGITAL_R1))
 			{
-				right_claw.move_velocity(-35);
+				right_claw.move_velocity(-50);
 			}
 			else if (master.get_digital(DIGITAL_R2))
 			{
-				right_claw.move_velocity(35);
+				right_claw.move_velocity(50);
 			}
 			else
 			{
@@ -187,53 +197,20 @@ void opcontrol()
 			}
 		}
 
-		// partner claw
-		if (combined_partner)
+		if (master.get_digital(DIGITAL_UP))
 		{
-			if (partner.get_digital(DIGITAL_R1))
-			{
-				right_claw.move_velocity(-35);
-				left_claw.move_velocity(35);
-			}
-			else if (partner.get_digital(DIGITAL_R2))
-			{
-				right_claw.move_velocity(35);
-				left_claw.move_velocity(-35);
-			}
-			else
-			{
-				right_claw.move_velocity(0);
-				left_claw.move_velocity(0);
-			}
+			left_lift.move_velocity(-45);
+			right_lift.move_velocity(45);
+		}
+		else if (master.get_digital(DIGITAL_DOWN))
+		{
+			left_lift.move_velocity(45);
+			right_lift.move_velocity(-45);
 		}
 		else
 		{
-
-			if (partner.get_digital(DIGITAL_L1))
-			{
-				left_claw.move_velocity(35);
-			}
-			else if (partner.get_digital(DIGITAL_L2))
-			{
-				left_claw.move_velocity(-35);
-			}
-			else
-			{
-				left_claw.move_velocity(0);
-			}
-
-			if (partner.get_digital(DIGITAL_R1))
-			{
-				right_claw.move_velocity(-35);
-			}
-			else if (partner.get_digital(DIGITAL_R2))
-			{
-				right_claw.move_velocity(35);
-			}
-			else
-			{
-				right_claw.move_velocity(0);
-			}
+			left_lift.move_velocity(0);
+			right_lift.move_velocity(0);
 		}
 
 		if (master.get_digital_new_press(DIGITAL_X) || partner.get_digital_new_press(DIGITAL_X))
@@ -266,25 +243,41 @@ void opcontrol()
 
 		if (master.get_digital_new_press(DIGITAL_Y) || partner.get_digital_new_press(DIGITAL_Y))
 		{
-			if (combined_master)
+			if (combined)
 			{
-				combined_master = false;
+				combined = false;
 			}
 			else
 			{
-				combined_master = true;
+				combined = true;
 			}
 		}
 
-		if (partner.get_digital_new_press(DIGITAL_B))
+		if (master.get_digital_new_press(DIGITAL_B) || partner.get_digital_new_press(DIGITAL_B))
 		{
-			if (combined_partner)
+			left_claw.move_absolute(200, 100);
+			right_claw.move_absolute(-200, 100);
+			while (!((left_claw.get_position() < 205) && (left_claw.get_position() > 195)))
 			{
-				combined_partner = false;
+				pros::delay(2);
+			}
+			while (!((right_claw.get_position() < -195) && (right_claw.get_position() > -205)))
+			{
+				pros::delay(2);
+			}
+		}
+
+		if (master.get_digital_new_press(DIGITAL_LEFT) || partner.get_digital_new_press(DIGITAL_LEFT))
+		{
+			if (piston_state)
+			{
+				piston.set_value(true);
+				piston_state = false;
 			}
 			else
 			{
-				combined_partner = true;
+				piston.set_value(false);
+				piston_state = true;
 			}
 		}
 
