@@ -4,14 +4,19 @@
 
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 pros::Controller partner(pros::E_CONTROLLER_PARTNER);
-pros::Motor left_mtr_front(4);
-pros::Motor left_mtr_back(19);
-pros::Motor right_mtr_front(14);
-pros::Motor right_mtr_back(16);
-pros::Motor left_claw(1);
-pros::Motor right_claw(2);
-pros::Motor left_lift(17);
-pros::Motor right_lift(20);
+pros::Motor left_mtr_front(20);
+pros::Motor left_mtr_back(10);
+pros::Motor right_mtr_front(11);
+pros::Motor right_mtr_back(1);
+
+/* Lift is the actual lift (the one that rotates up) */
+/* Claw is the other one (the rotator with two beams) */
+
+pros::Motor left_claw(9);
+pros::Motor right_claw(12);
+pros::Motor left_lift(8);
+pros::Motor right_lift(2); //port 2 is broken
+pros::ADIDigitalOut piston(DIGITAL_SENSOR_PORT);
 
 int speed = 2;
 bool locked = true;
@@ -110,7 +115,33 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+	
+	const int DRIVE_MOTOR_LEFT = 1;
+	const int DRIVE_MOTOR_RIGHT = 2;
+	left_mtr_back = 32;
+	left_mtr_front = 32;
+	right_mtr_back = 32 * -1;
+	right_mtr_front = 32 * -1;
+	// drive forward 
+	
+	// shoot pistons 
+	piston.set_value(piston_state);
+	piston_state = true;
+
+	piston.set_value(piston_state);
+	piston_state = false;
+
+	// lift armsx`
+	right_claw.move_velocity(-50);
+	left_claw.move_velocity(50);
+	// go back
+	left_mtr_back = 32;
+	left_mtr_front = 32;
+	right_mtr_back = 32 * -1;
+	right_mtr_front = 32 * -1;
+	// max speed
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -127,8 +158,6 @@ void autonomous() {}
  */
 void opcontrol()
 {
-	pros::ADIDigitalOut piston(DIGITAL_SENSOR_PORT);
-
 	if (locked)
 	{
 		left_claw.set_brake_mode(pros::motor_brake_mode_e_t::E_MOTOR_BRAKE_HOLD);
@@ -267,6 +296,7 @@ void opcontrol()
 			}
 		}
 
+		// left on dpad
 		if (master.get_digital_new_press(DIGITAL_LEFT) || partner.get_digital_new_press(DIGITAL_LEFT))
 		{
 			if (piston_state)
