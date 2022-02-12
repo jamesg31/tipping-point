@@ -117,12 +117,21 @@ void competition_initialize() {}
  */
 void autonomous() {
 	
-	const int DRIVE_MOTOR_LEFT = 1;
-	const int DRIVE_MOTOR_RIGHT = 2;
-	left_mtr_back.move(32);
-	left_mtr_front.move(32); 
-	right_mtr_back.move(32);
-	right_mtr_front.move(32); 	
+	// const int DRIVE_MOTOR_LEFT = 1;
+	// const int DRIVE_MOTOR_RIGHT = 2;
+
+	master.set_text(1, 0, "AUTON");
+
+	// forward
+	// left_mtr_back.move(28.8);
+	// left_mtr_front.move(28.8); 
+	// right_mtr_back.move(28.8);
+	// right_mtr_front.move(28.8); 	
+
+	left_mtr_back = 28.8;
+	left_mtr_front = 28.8; 
+	right_mtr_back = 28.8;
+	right_mtr_front = 28.8; 
 	// pros::delay(12000);
 	// bot stops moving 
 	// left_mtr_back = 0; 	// sets the movement to 0 (we know this isn't practical)
@@ -134,6 +143,31 @@ void autonomous() {
 	// right_mtr_back.move(0);
 	// right_mtr_front.move(0); 	
 	
+	// turn right
+	left_mtr_back = 100;
+	left_mtr_front = 100;
+	right_mtr_back = 100;
+	right_mtr_front = 100;
+
+	// forward
+	left_mtr_back = 23.2;
+	left_mtr_front = 23.2; 
+	right_mtr_back = 23.2;
+	right_mtr_front = 23.2;
+
+	// turn left
+	left_mtr_back = -100;
+	left_mtr_front = -100;
+	right_mtr_back = -100;
+	right_mtr_front = -100;
+
+	// forward
+	left_mtr_back = 10.6;
+	left_mtr_front = 10.6; 
+	right_mtr_back = 10.6;
+	right_mtr_front = 10.6;
+
+
 	// shoot pistons 
 	piston.set_value(piston_state);
 	piston_state = true;
@@ -192,11 +226,15 @@ void opcontrol()
 	{
 		int left = master.get_analog(ANALOG_LEFT_Y);
 		int right = master.get_analog(ANALOG_RIGHT_Y);
-
+		std::cout << left << right;
 		left_mtr_back = left / speed;
 		left_mtr_front = left / speed;
 		right_mtr_back = right / speed * -1;
 		right_mtr_front = right / speed * -1;
+
+
+
+
 
 		// master claw
 		if (combined)
