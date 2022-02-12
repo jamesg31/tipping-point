@@ -141,20 +141,20 @@ void autonomous() {
     // 	pros::delay(2);
 	// }
 
-	left_mtr_back.move_velocity(32);
-	left_mtr_front.move_velocity(32); 
-	right_mtr_back.move_velocity(32);
-	right_mtr_front.move_velocity(32); 	
-	pros::delay(12000);
+	left_mtr_back.move(32);
+	left_mtr_front.move(32); 
+	right_mtr_back.move(32);
+	right_mtr_front.move(32); 	
+	// pros::delay(12000);
 	// bot stops moving 
 	// left_mtr_back = 0; 	// sets the movement to 0 (we know this isn't practical)
 	// left_mtr_front = 0;
 	// right_mtr_back = 0;
 	// right_mtr_front = 0;
-	left_mtr_back.move_velocity(0);
-	left_mtr_front.move_velocity(0); 
-	right_mtr_back.move_velocity(0);
-	right_mtr_front.move_velocity(0); 	
+	// left_mtr_back.move(0);
+	// left_mtr_front.move(0); 
+	// right_mtr_back.move(0);
+	// right_mtr_front.move(0); 	
 	
 	// shoot pistons 
 	piston.set_value(piston_state);
@@ -179,11 +179,11 @@ void autonomous() {
 	// left_mtr_front = 32;
 	// right_mtr_back = 32 * -1;
 	// right_mtr_front = 32 * -1;	
-	left_mtr_back.move_velocity(-32);
-	left_mtr_front.move_velocity(-32); 
-	right_mtr_back.move_velocity(-32);
-	right_mtr_front.move_velocity(-32);
-	pros::delay(12000); 
+	left_mtr_back.move(-32);
+	left_mtr_front.move(-32); 
+	right_mtr_back.move(-32);
+	right_mtr_front.move(-32);
+	// pros::delay(12000); 
 }
 
 /**
