@@ -15,7 +15,7 @@ pros::Motor right_mtr_back(1);
 pros::Motor left_claw(9);
 pros::Motor right_claw(12);
 pros::Motor left_lift(8);
-pros::Motor right_lift(2); //port 2 is broken
+pros::Motor right_lift(3); //port 2 is broken
 pros::ADIDigitalOut piston(DIGITAL_SENSOR_PORT);
 
 int speed = 2;
@@ -123,6 +123,7 @@ void autonomous() {
 	left_mtr_front = 32;
 	right_mtr_back = 32 * -1;
 	right_mtr_front = 32 * -1;
+	// pros::delay(2);
 	// drive forward 
 	
 	// shoot pistons 
@@ -180,12 +181,12 @@ void opcontrol()
 		// master claw
 		if (combined)
 		{
-			if (master.get_digital(DIGITAL_R1))
+			if (master.get_digital(DIGITAL_R2))
 			{
 				right_claw.move_velocity(-50);
 				left_claw.move_velocity(50);
 			}
-			else if (master.get_digital(DIGITAL_R2))
+			else if (master.get_digital(DIGITAL_R1))
 			{
 				right_claw.move_velocity(50);
 				left_claw.move_velocity(-50);
@@ -199,11 +200,11 @@ void opcontrol()
 		else
 		{
 
-			if (master.get_digital(DIGITAL_L1))
+			if (master.get_digital(DIGITAL_L2))
 			{
 				left_claw.move_velocity(50);
 			}
-			else if (master.get_digital(DIGITAL_L2))
+			else if (master.get_digital(DIGITAL_L1))
 			{
 				left_claw.move_velocity(-50);
 			}
@@ -212,11 +213,11 @@ void opcontrol()
 				left_claw.move_velocity(0);
 			}
 
-			if (master.get_digital(DIGITAL_R1))
+			if (master.get_digital(DIGITAL_R2))
 			{
 				right_claw.move_velocity(-50);
 			}
-			else if (master.get_digital(DIGITAL_R2))
+			else if (master.get_digital(DIGITAL_R1))
 			{
 				right_claw.move_velocity(50);
 			}
@@ -270,17 +271,17 @@ void opcontrol()
 			}
 		}
 
-		if (master.get_digital_new_press(DIGITAL_Y) || partner.get_digital_new_press(DIGITAL_Y))
-		{
-			if (combined)
-			{
-				combined = false;
-			}
-			else
-			{
-				combined = true;
-			}
-		}
+		// if (master.get_digital_new_press(DIGITAL_Y) || partner.get_digital_new_press(DIGITAL_Y))
+		// {
+		// 	if (combined)
+		// 	{
+		// 		combined = false;
+		// 	}
+		// 	else
+		// 	{
+		// 		combined = true;
+		// 	}
+		// }
 
 		if (master.get_digital_new_press(DIGITAL_B) || partner.get_digital_new_press(DIGITAL_B))
 		{
