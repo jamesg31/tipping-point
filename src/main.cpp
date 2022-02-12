@@ -119,29 +119,49 @@ void autonomous() {
 	
 	const int DRIVE_MOTOR_LEFT = 1;
 	const int DRIVE_MOTOR_RIGHT = 2;
-	left_mtr_back = 32;
-	left_mtr_front = 32;
-	right_mtr_back = 32 * -1;
-	right_mtr_front = 32 * -1;
-	// pros::delay(2);
-	// drive forward 
+	left_mtr_back.move(32);
+	left_mtr_front.move(32); 
+	right_mtr_back.move(32);
+	right_mtr_front.move(32); 	
+	// pros::delay(12000);
+	// bot stops moving 
+	// left_mtr_back = 0; 	// sets the movement to 0 (we know this isn't practical)
+	// left_mtr_front = 0;
+	// right_mtr_back = 0;
+	// right_mtr_front = 0;
+	// left_mtr_back.move(0);
+	// left_mtr_front.move(0); 
+	// right_mtr_back.move(0);
+	// right_mtr_front.move(0); 	
 	
 	// shoot pistons 
 	piston.set_value(piston_state);
 	piston_state = true;
 
+	// keep them down
+	pros::delay(20000); // (milliseconds)
+
+	// bring them back up
 	piston.set_value(piston_state);
 	piston_state = false;
 
-	// lift armsx`
+	// lift arms
 	right_claw.move_velocity(-50);
 	left_claw.move_velocity(50);
+	pros::delay(3000);
+	right_claw.move_velocity(0);
+	left_claw.move_velocity(0);	
+
 	// go back
-	left_mtr_back = 32;
-	left_mtr_front = 32;
-	right_mtr_back = 32 * -1;
-	right_mtr_front = 32 * -1;
-	// max speed
+	// left_mtr_back = 32;
+	// left_mtr_front = 32;
+	// right_mtr_back = 32 * -1;
+	// right_mtr_front = 32 * -1;	
+	left_mtr_back.move(-32);
+	left_mtr_front.move(-32); 
+	right_mtr_back.move(-32);
+	right_mtr_front.move(-32);
+	// pros::delay(12000); 
 }
 
 /**
