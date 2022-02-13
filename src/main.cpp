@@ -119,19 +119,56 @@ void autonomous() {
 	
 	// const int DRIVE_MOTOR_LEFT = 1;
 	// const int DRIVE_MOTOR_RIGHT = 2;
-
+	double ticks_per_inch = 10.18; 
 	master.set_text(1, 0, "AUTON");
-
+	
 	// forward
 	// left_mtr_back.move(28.8);
 	// left_mtr_front.move(28.8); 
 	// right_mtr_back.move(28.8);
 	// right_mtr_front.move(28.8); 	
+	bool end = false; 
+	while (end == false) {
+	// moving lift down
+	// while (!((left_claw.get_position() < 205) && (left_claw.get_position() > 195)))
+	// 		{
+	// 			pros::delay(2);
+	// 		}
+	printf("Decimals: %d %d\n", left_lift.get_position(), right_lift.get_position());
+	pros::delay(500);
+	left_lift.move_relative(900, 100);
+	right_lift.move_relative(-900, 100);
+	const double left_lift_pos = left_lift.get_position();
+	const double right_lift_pos = right_lift.get_position();
+	printf("Decimals: %d %d\n", left_lift_pos, right_lift_pos);
+	pros::delay(500); // so that we can use absolute and the while loop
 
-	left_mtr_back = 28.8;
-	left_mtr_front = 28.8; 
-	right_mtr_back = 28.8;
-	right_mtr_front = 28.8; 
+	// going forward
+	left_mtr_back = -100 ; // speed
+	left_mtr_front = -100 ; 
+	right_mtr_back = 100 ;
+	right_mtr_front = 100 ; 
+	pros::delay(1500); // how long that speed lasts
+	// lift arms up
+	left_mtr_back = 0 ; // speed
+	left_mtr_front = 0 ; 
+	right_mtr_back = 0 ;
+	right_mtr_front = 0 ; 
+	left_lift.move_relative(-900, 100); // this part idk the nums
+	right_lift.move_relative(900, 100);
+	pros::delay(2000); // went forward or whateb bc of delay
+	// go back
+	left_mtr_back = 100;
+	left_mtr_front = 100 ; 
+	right_mtr_back = -100;
+	right_mtr_front = -100;
+	pros::delay(1500);
+	left_mtr_back = 0 ; // speed
+	left_mtr_front = 0 ; 
+	right_mtr_back = 0 ;
+	right_mtr_front = 0 ; 
+	end = true;
+	}
 	// pros::delay(12000);
 	// bot stops moving 
 	// left_mtr_back = 0; 	// sets the movement to 0 (we know this isn't practical)
@@ -143,59 +180,59 @@ void autonomous() {
 	// right_mtr_back.move(0);
 	// right_mtr_front.move(0); 	
 	
-	// turn right
-	left_mtr_back = 100;
-	left_mtr_front = 100;
-	right_mtr_back = 100;
-	right_mtr_front = 100;
+	// // turn right
+	// left_mtr_back = 100;
+	// left_mtr_front = 100;
+	// right_mtr_back = 100;
+	// right_mtr_front = 100;
 
-	// forward
-	left_mtr_back = 23.2;
-	left_mtr_front = 23.2; 
-	right_mtr_back = 23.2;
-	right_mtr_front = 23.2;
+	// // forward
+	// left_mtr_back = 23.2 * ticks_per_inch;
+	// left_mtr_front = 23.2 * ticks_per_inch; 
+	// right_mtr_back = 23.2 * ticks_per_inch;
+	// right_mtr_front = 23.2 * ticks_per_inch;
 
-	// turn left
-	left_mtr_back = -100;
-	left_mtr_front = -100;
-	right_mtr_back = -100;
-	right_mtr_front = -100;
+	// // turn left
+	// left_mtr_back = -100;
+	// left_mtr_front = -100;
+	// right_mtr_back = -100;
+	// right_mtr_front = -100;
 
-	// forward
-	left_mtr_back = 10.6;
-	left_mtr_front = 10.6; 
-	right_mtr_back = 10.6;
-	right_mtr_front = 10.6;
+	// // forward
+	// left_mtr_back = 10.6 * ticks_per_inch;
+	// left_mtr_front = 10.6 * ticks_per_inch; 
+	// right_mtr_back = 10.6 * ticks_per_inch;
+	// right_mtr_front = 10.6 * ticks_per_inch;
 
 
-	// shoot pistons 
-	piston.set_value(piston_state);
-	piston_state = true;
+	// // shoot pistons 
+	// piston.set_value(piston_state);
+	// piston_state = true;
 
-	// keep them down
-	pros::delay(20000); // (milliseconds)
+	// // keep them down
+	// pros::delay(20000); // (milliseconds)
 
-	// bring them back up
-	piston.set_value(piston_state);
-	piston_state = false;
+	// // bring them back up
+	// piston.set_value(piston_state);
+	// piston_state = false;
 
-	// lift arms
-	right_claw.move_velocity(-50);
-	left_claw.move_velocity(50);
-	pros::delay(3000);
-	right_claw.move_velocity(0);
-	left_claw.move_velocity(0);	
+	// // lift arms
+	// right_claw.move_velocity(-50);
+	// left_claw.move_velocity(50);
+	// pros::delay(3000);
+	// right_claw.move_velocity(0);
+	// left_claw.move_velocity(0);	
 
-	// go back
-	// left_mtr_back = 32;
-	// left_mtr_front = 32;
-	// right_mtr_back = 32 * -1;
-	// right_mtr_front = 32 * -1;	
-	left_mtr_back.move(-32);
-	left_mtr_front.move(-32); 
-	right_mtr_back.move(-32);
-	right_mtr_front.move(-32);
-	// pros::delay(12000); 
+	// // go back
+	// // left_mtr_back = 32;
+	// // left_mtr_front = 32;
+	// // right_mtr_back = 32 * -1;
+	// // right_mtr_front = 32 * -1;	
+	// left_mtr_back.move(-32);
+	// left_mtr_front.move(-32); 
+	// right_mtr_back.move(-32);
+	// right_mtr_front.move(-32);
+	// // pros::delay(12000); 
 }
 
 /**
